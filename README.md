@@ -19,7 +19,7 @@ I plan to add a voice ptt mode and some other features later.
 - 🚫 **Content Filtering**: Built-in profanity filter
 - 🌐 **Offline Maps**: Support for locally-hosted map tiles
 
-### Simple login with no external auth needed.
+### Simple login with no external authentication needed.
 ![Login Screen](Screenshots/Login.png)
 *Simple login screen lets users pick a name or enter a call sign*
 
@@ -27,7 +27,7 @@ I plan to add a voice ptt mode and some other features later.
 ![Main interface](Screenshots/Message.png)
 *Easy to use with core functions of modern messaging included.*
 
-### Locations are shareable from device or manualy and can used predownloaded map tiles for 100% offline location services.
+### Locations are shareable from device or manually and can used predownloaded map tiles for 100% offline location services.
 ![Map location](Screenshots/Map.png)
 *Users can choose to share their location if they need help or help people locate eachother.*
 
