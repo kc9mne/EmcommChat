@@ -20,15 +20,15 @@ I plan to add a voice ptt mode and some other features later.
 - 🌐 **Offline Maps**: Support for locally-hosted map tiles
 
 ### Simple login with no external auth needed.
-![Login Screen](screenshots/Login.png)
+![Login Screen](Screenshots/Login.png)
 *Simple login screen lets users pick a name or enter a call sign*
 
 ### Simple Chat interface with image support, Admin created rooms basic file sharing, and direct messaging.
-![Main interface](screenshots/Message.png)
+![Main interface](Screenshots/Message.png)
 *Easy to use with core functions of modern messaging included.*
 
 ### Locations are shareable from device or manualy and can used predownloaded map tiles for 100% offline location services.
-![Map location](screenshots/Map.png)
+![Map location](Screenshots/Map.png)
 *Users can choose to share their location if they need help or help people locate eachother.*
 
 ## Requirements
