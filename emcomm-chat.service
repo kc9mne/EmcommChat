@@ -1,0 +1,27 @@
+[Unit]
+Description=EmComm Chat - Emergency Communications Platform
+Documentation=https://github.com/yourusername/emcomm-chat
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/path/to/emcomm-chat
+Environment="NODE_ENV=production"
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=emcomm-chat
+
+# Security settings (optional but recommended)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/path/to/emcomm-chat/data /path/to/emcomm-chat/uploads
+
+[Install]
+WantedBy=multi-user.target

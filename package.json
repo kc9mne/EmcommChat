@@ -1,0 +1,21 @@
+{
+  "name": "emcomm-chat",
+  "version": "1.0.0",
+  "description": "Offline emergency communications platform for text chat, file sharing, and location tracking",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["emcomm", "emergency", "chat", "offline"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "sqlite3": "^5.1.6",
+    "multer": "^1.4.5-lts.1",
+    "bad-words": "^3.0.4",
+    "express-rate-limit": "^6.7.0"
+  }
+}

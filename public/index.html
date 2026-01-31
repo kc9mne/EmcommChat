@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmComm Chat</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <h1>🛰️ EmComm Chat</h1>
+            <p>Emergency Communications Platform</p>
+            <div class="login-form">
+                <input type="text" id="nickname-input" placeholder="Enter nickname (8-16 chars)" maxlength="16">
+                <button id="join-btn">Join Network</button>
+                <p class="hint">Offline-first emergency communications</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Interface -->
+    <div id="chat-screen" class="screen">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>EmComm</h2>
+                <div class="user-info">
+                    <span id="current-user"></span>
+                    <button id="admin-btn" class="icon-btn" title="Admin">⚙️</button>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-view="rooms">Rooms</button>
+                <button class="nav-tab" data-view="dms">Messages</button>
+                <button class="nav-tab" data-view="users">Users</button>
+                <button class="nav-tab" data-view="files">Files</button>
+            </div>
+
+            <!-- Rooms List -->
+            <div class="tab-content active" id="rooms-view">
+                <div id="rooms-list" class="list"></div>
+            </div>
+
+            <!-- DMs List -->
+            <div class="tab-content" id="dms-view">
+                <div id="dms-list" class="list"></div>
+            </div>
+
+            <!-- Users List -->
+            <div class="tab-content" id="users-view">
+                <div id="users-list" class="list"></div>
+            </div>
+
+            <!-- Files List -->
+            <div class="tab-content" id="files-view">
+                <div class="file-upload-section">
+                    <input type="file" id="file-input" style="display: none;">
+                    <button id="upload-file-btn" class="btn-primary">📤 Upload File</button>
+                </div>
+                <div id="files-list" class="list"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-header">
+                <h3 id="chat-title">Select a room or user</h3>
+                <div class="chat-actions">
+                    <button id="location-btn" class="icon-btn" title="Share Location">📍</button>
+                    <button id="image-btn" class="icon-btn" title="Share Image">🖼️</button>
+                </div>
+            </div>
+
+            <div id="messages-container" class="messages-container"></div>
+
+            <div class="message-input-container">
+                <input type="text" id="message-input" placeholder="Type a message..." disabled>
+                <button id="send-btn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Admin Panel</h2>
+            <div class="admin-login">
+                <input type="text" id="admin-username" placeholder="Username">
+                <input type="password" id="admin-password" placeholder="Password">
+                <button id="admin-login-btn">Login</button>
+            </div>
+            <div id="admin-controls" style="display: none;">
+                <h3>Create Room</h3>
+                <input type="text" id="new-room-name" placeholder="Room name">
+                <button id="create-room-btn">Create</button>
+                
+                <h3>Kick User</h3>
+                <select id="kick-user-select"></select>
+                <button id="kick-user-btn">Kick</button>
+                
+                <h3 style="margin-top: 20px; color: #ff5252;">Danger Zone</h3>
+                <button id="clear-data-btn" style="background: #d32f2f;">🗑️ Clear All Data</button>
+                <p style="font-size: 0.85em; color: #999;">Deletes all messages, files, and uploads. Cannot be undone!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Modal -->
+    <div id="map-modal" class="modal">
+        <div class="modal-content large">
+            <span class="close">&times;</span>
+            <h2>Share Location</h2>
+            <div id="map" style="height: 400px;"></div>
+            <button id="send-location-btn" class="btn-primary">Send Location</button>
+        </div>
+    </div>
+
+    <!-- Image Upload -->
+    <input type="file" id="image-input" accept="image/*" style="display: none;">
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
