@@ -21,7 +21,7 @@ I plan to add a voice ptt mode and some other features later.
 
 ### Simple login with no external authentication needed.
 ![Login Screen](Screenshots/Login.png)
-*Simple login screen lets users pick a name or enter a call sign*
+*Simple login screen lets users pick a name or enter a call sign.*
 
 ### Simple Chat interface with image support, Admin created rooms basic file sharing, and direct messaging.
 ![Main interface](Screenshots/Message.png)
