@@ -31,6 +31,19 @@ Offline-first emergency communications platform for text chat, voice/PTT, file s
 - 2GB RAM minimum
 - 32GB storage (recommended for map tiles and uploads)
 - Linux-based SBC (Raspberry Pi 4/5, Orange Pi, etc.) or any computer
+- 🌐 **Offline Maps**: Support for locally-hosted map tiles
+
+### Simple login with no external auth needed.
+![Login Screen](Screenshots/Login.png)
+*Simple login screen lets users pick a name or enter a call sign*
+
+### Simple Chat interface with image support, Admin created rooms basic file sharing, and direct messaging.
+![Main interface](Screenshots/Message.png)
+*Easy to use with core functions of modern messaging included.*
+
+### Locations are shareable from device or manualy and can used predownloaded map tiles for 100% offline location services.
+![Map location](Screenshots/Map.png)
+*Users can choose to share their location if they need help or help people locate eachother.*
 
 ## Quick Start
 
