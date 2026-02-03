@@ -14,7 +14,7 @@
             <h1>🛰️ EmComm Chat</h1>
             <p>Emergency Communications Platform</p>
             <div class="login-form">
-                <input type="text" id="nickname-input" placeholder="Enter nickname (8-16 chars)" maxlength="16">
+                <input type="text" id="nickname-input" placeholder="Enter nickname (4-16 chars)" maxlength="16">
                 <button id="join-btn">Join Network</button>
                 <p class="hint">Offline-first emergency communications</p>
             </div>
@@ -23,19 +23,23 @@
 
     <!-- Main Chat Interface -->
     <div id="chat-screen" class="screen">
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="mobile-menu-btn">☰</button>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+        
         <div class="sidebar">
             <div class="sidebar-header">
                 <h2>EmComm</h2>
                 <div class="user-info">
                     <span id="current-user"></span>
                     <button id="admin-btn" class="icon-btn" title="Admin">⚙️</button>
+                    <a href="/downloads.html" class="icon-btn" title="Download Desktop App" target="_blank">📥</a>
                 </div>
             </div>
 
             <!-- Navigation Tabs -->
             <div class="nav-tabs">
                 <button class="nav-tab active" data-view="rooms">Rooms</button>
-                <button class="nav-tab" data-view="dms">Messages</button>
                 <button class="nav-tab" data-view="users">Users</button>
                 <button class="nav-tab" data-view="files">Files</button>
             </div>
@@ -43,11 +47,6 @@
             <!-- Rooms List -->
             <div class="tab-content active" id="rooms-view">
                 <div id="rooms-list" class="list"></div>
-            </div>
-
-            <!-- DMs List -->
-            <div class="tab-content" id="dms-view">
-                <div id="dms-list" class="list"></div>
             </div>
 
             <!-- Users List -->
@@ -63,14 +62,66 @@
                 </div>
                 <div id="files-list" class="list"></div>
             </div>
+
+            <!-- Voice Panel in Sidebar -->
+            <div class="voice-sidebar-panel">
+                <div class="voice-sidebar-header">
+                    <h4>🎤 Voice Channel</h4>
+                </div>
+                
+                <!-- When NOT in voice - shows join button -->
+                <div id="voice-join-section">
+                    <button id="voice-btn-sidebar" class="btn-primary" style="width: 100%; margin: 0.5rem 0;">
+                        🎤 Join Voice
+                    </button>
+                </div>
+                
+                <!-- When IN voice - shows controls and participants -->
+                <div id="voice-status-sidebar" style="display: none;">
+                    <div class="voice-info-compact">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span id="voice-room-name-sidebar" style="font-weight: 600; color: #4CAF50;">General</span>
+                            <span id="voice-user-count-sidebar" style="font-size: 0.85rem; color: #999;">0 users</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Participants List -->
+                    <div id="voice-participants" class="voice-participants-sidebar"></div>
+                    
+                    <!-- PTT Control -->
+                    <button id="ptt-btn" class="ptt-btn-sidebar">
+                        <span class="ptt-indicator">🎤 Push to Talk</span>
+                    </button>
+                    
+                    <button id="leave-voice-btn" class="btn-secondary" style="width: 100%; margin-top: 0.5rem; font-size: 0.9rem;">
+                        Leave Voice
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
             <div class="chat-header">
                 <h3 id="chat-title">Select a room or user</h3>
                 <div class="chat-actions">
+                    <button id="voice-btn" class="icon-btn" title="Join Voice Channel">🎤</button>
                     <button id="location-btn" class="icon-btn" title="Share Location">📍</button>
                     <button id="image-btn" class="icon-btn" title="Share Image">🖼️</button>
+                </div>
+            </div>
+
+            <!-- Voice Status Bar (MOBILE - shows under header) -->
+            <div id="voice-status" class="voice-status" style="display: none;">
+                <div class="voice-info">
+                    <span id="voice-room-name">Voice Channel</span>
+                    <span id="voice-user-count">0 users</span>
+                </div>
+                <div id="voice-participants-mobile" class="voice-participants-mobile"></div>
+                <div class="voice-controls">
+                    <button id="ptt-btn-mobile" class="ptt-btn">
+                        <span class="ptt-indicator-mobile">🎤 Push to Talk</span>
+                    </button>
+                    <button id="leave-voice-btn-mobile" class="btn-small">Leave Voice</button>
                 </div>
             </div>
 
@@ -124,6 +175,7 @@
 
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/voice.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

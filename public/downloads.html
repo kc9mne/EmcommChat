@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmComm Chat - Downloads & Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #333;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: #66BB6A;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #45a049;
+        }
+        
+        .download-btn.secondary {
+            background: #2196F3;
+        }
+        
+        .download-btn.secondary:hover {
+            background: #1976D2;
+        }
+        
+        .instruction-step {
+            background: #1e1e1e;
+            border-left: 4px solid #4CAF50;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .instruction-step h4 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background: #1e1e1e;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: #FF9800;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            background: none;
+            padding: 0;
+            color: #4CAF50;
+        }
+        
+        .warning {
+            background: #2a2a0a;
+            border-left: 4px solid #FF9800;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .info {
+            background: #0a1a2a;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        ul {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+        
+        li {
+            margin: 0.5rem 0;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .feature {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📻 EmComm Chat</h1>
+            <p class="subtitle">Emergency Communications Platform</p>
+        </header>
+
+        <!-- Desktop Apps Section -->
+        <div class="section">
+            <h2>🖥️ Desktop Applications</h2>
+            <p>Desktop apps provide the best experience with built-in microphone access for voice/PTT functionality.</p>
+            
+            <div class="feature-list">
+                <div class="feature">
+                    <div class="feature-icon">🎤</div>
+                    <div>Voice/PTT Support</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <div>No Encryption (Ham Compliant)</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💻</div>
+                    <div>Standalone App</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📶</div>
+                    <div>Offline Capable</div>
+                </div>
+            </div>
+            
+            <h3>Download Desktop Apps:</h3>
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="/downloads/EmComm-Chat-Windows.exe" class="download-btn" download>
+                    🪟 Windows (.exe)
+                </a>
+                <a href="/downloads/EmComm-Chat-Linux.AppImage" class="download-btn" download>
+                    🐧 Linux (.AppImage)
+                </a>
+                <a href="/downloads/EmComm-Chat-Mac.dmg" class="download-btn" download>
+                    🍎 macOS (.dmg)
+                </a>
+            </div>
+            
+            <div class="info" style="margin-top: 2rem;">
+                <strong>ℹ️ First Time Setup:</strong> The desktop apps are pre-configured to connect to your EmComm server. Simply download, install, and run!
+            </div>
+        </div>
+
+        <!-- Browser Setup Section -->
+        <div class="section">
+            <h2>🌐 Browser Setup (Chrome/Edge)</h2>
+            <p>Use EmComm Chat directly in your browser with voice support by enabling microphone access over HTTP.</p>
+            
+            <div class="warning">
+                <strong>⚠️ Why This Step Is Needed:</strong> Modern browsers block microphone access over HTTP for security. Since EmComm Chat runs on your local network without HTTPS, we need to tell your browser to allow it.
+            </div>
+            
+            <h3>Step-by-Step Instructions:</h3>
+            
+            <div class="instruction-step">
+                <h4>Step 1: Open Chrome or Edge</h4>
+                <p>Launch your Chrome or Edge browser.</p>
+            </div>
+            
+            <div class="instruction-step">
+                <h4>Step 2: Open Flags Page</h4>
+                <p>In the address bar, type:</p>
+                <div class="code-block">
+                    <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code>
+                </div>
+                or 
+                  <div class="code-block">
+                    <code>edge://flags/#unsafely-treat-insecure-origin-as-secure</code>
+                </div>
+                <p>Press <strong>Enter</strong></p>
+            </div>
+            
+            <div class="instruction-step">
+                <h4>Step 3: Add Your Server URL</h4>
+                <p>In the text box that appears, enter your EmComm server address:</p>
+                <div class="code-block">
+                    <code id="server-url">http://192.168.3.113:3000</code>
+                </div>
+                <p style="margin-top: 0.5rem;">
+                    <button onclick="copyServerUrl()" style="background: #4CAF50; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+                        📋 Copy Server URL
+                    </button>
+                </p>
+            </div>
+            
+            <div class="instruction-step">
+                <h4>Step 4: Set to "Enabled"</h4>
+                <p>Click the dropdown menu next to the setting and select <strong>"Enabled"</strong>.</p>
+            </div>
+            
+            <div class="instruction-step">
+                <h4>Step 5: Restart Browser</h4>
+                <p>Click the <strong>"Relaunch"</strong> button that appears at the bottom of the page.</p>
+            </div>
+            
+            <div class="instruction-step">
+                <h4>Step 6: Access EmComm Chat</h4>
+                <p>Navigate to:</p>
+                <div class="code-block">
+                    <code><span id="chat-url">http://192.168.3.113:3000</span></code>
+                </div>
+                <p style="margin-top: 0.5rem;">Voice/PTT should now work! 🎤</p>
+            </div>
+            
+            <div class="info" style="margin-top: 2rem;">
+                <strong>ℹ️ Note:</strong> This setting only applies to the specific URL you entered. Your browser remains secure for all other websites.
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="section">
+            <h2>✨ Features</h2>
+            <ul>
+                <li><strong>📡 Real-time Messaging:</strong> Instant text communication</li>
+                <li><strong>🎤 Voice/PTT:</strong> Push-to-talk voice channels</li>
+                <li><strong>📁 File Sharing:</strong> Share files and images</li>
+                <li><strong>📍 Location Sharing:</strong> Share GPS coordinates</li>
+                <li><strong>🗺️ Map Integration:</strong> View shared locations on map</li>
+                <li><strong>👥 Multi-User:</strong> Support for multiple simultaneous users</li>
+                <li><strong>🔓 No Encryption:</strong> Ham radio compliant (no encryption)</li>
+                <li><strong>💾 Offline Storage:</strong> Messages persist locally</li>
+            </ul>
+        </div>
+
+        <!-- Troubleshooting Section -->
+        <div class="section">
+            <h2>🔧 Troubleshooting</h2>
+            
+            <h3>Desktop App Issues:</h3>
+            <ul>
+                <li><strong>App won't close:</strong> Check Task Manager (Windows) or Activity Monitor (Mac) and end the EmComm process</li>
+                <li><strong>Can't connect:</strong> Verify the server is running and accessible on your network</li>
+                <li><strong>No voice:</strong> Check your microphone permissions in system settings</li>
+            </ul>
+            
+            <h3>Browser Issues:</h3>
+            <ul>
+                <li><strong>Microphone not working:</strong> Verify you completed all 6 setup steps above</li>
+                <li><strong>Can't hear others:</strong> Check your system volume and browser permissions</li>
+                <li><strong>PTT button disabled:</strong> Another user is currently transmitting (channel busy)</li>
+            </ul>
+        </div>
+
+        <!-- System Requirements -->
+        <div class="section">
+            <h2>💻 System Requirements</h2>
+            
+            <h3>Desktop Apps:</h3>
+            <ul>
+                <li>Windows 10 or later</li>
+                <li>macOS 10.13 or later</li>
+                <li>Linux (most distributions)</li>
+                <li>2GB RAM minimum</li>
+                <li>Internet connection (LAN/WiFi)</li>
+            </ul>
+            
+            <h3>Browser:</h3>
+            <ul>
+                <li>Chrome 90+ or Edge 90+</li>
+                <li>Firefox (limited voice support)</li>
+                <li>Safari (limited voice support)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect and insert server URL
+        const serverUrl = window.location.origin;
+        document.getElementById('server-url').textContent = serverUrl;
+        document.getElementById('chat-url').textContent = serverUrl;
+        
+        function copyServerUrl() {
+            const url = document.getElementById('server-url').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ Server URL copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>

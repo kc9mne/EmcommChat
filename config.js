@@ -2,7 +2,10 @@ module.exports = {
   // Server configuration
   server: {
     port: 3000,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    enableHttps: false,  // Set to true to enable HTTPS (required for voice on mobile)
+    sslKeyPath: './ssl/key.pem',
+    sslCertPath: './ssl/cert.pem'
   },
 
   // Admin credentials (CHANGE THESE!)
@@ -19,7 +22,7 @@ module.exports = {
 
   // User settings
   user: {
-    nicknameMinLength: 8,
+    nicknameMinLength: 4,  // Changed from 8 to 4 for ham callsigns
     nicknameMaxLength: 16,
     allowAnonymous: false  // Require nickname to connect
   },

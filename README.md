@@ -1,11 +1,6 @@
 # EmComm Chat - Emergency Communications Platform
 
 Offline-first emergency communications platform for text chat, direct messaging, file sharing, and location tracking.
-Built for Ham radio networks and on the spot wireless data networks during emergency’s when internet may not be available. Allows simple messaging and critical information sharing similar to meshtastic but using no apps and any ip network. A stand alone solution would include any router that supports a captive portal that points at a server running this app. like a pi zero or similar.
-
-You could deploy this on a large mesh and enable community chat.
-
-I plan to add a voice ptt mode and some other features later.
 
 ## Features
 
@@ -18,18 +13,6 @@ I plan to add a voice ptt mode and some other features later.
 - 🗑️ **Auto-Cleanup**: Configurable message retention (1-7 days)
 - 🚫 **Content Filtering**: Built-in profanity filter
 - 🌐 **Offline Maps**: Support for locally-hosted map tiles
-
-### Simple login with no external auth needed.
-![Login Screen](screenshots/Login.png)
-*Simple login screen lets users pick a name or enter a call sign*
-
-### Simple Chat interface with image support, Admin created rooms basic file sharing, and direct messaging.
-![Main interface](screenshots/Message.png)
-*Easy to use with core functions of modern messaging included.*
-
-### Locations are shareable from device or manualy and can used predownloaded map tiles for 100% offline location services.
-![Map location](screenshots/Map.png)
-*Users can choose to share their location if they need help or help people locate eachother.*
 
 ## Requirements
 

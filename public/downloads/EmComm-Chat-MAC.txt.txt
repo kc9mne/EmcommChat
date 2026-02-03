@@ -1,0 +1,8 @@
+Sorry I do not have a MAC. 
+
+if you have one clone the repo go to the EmCommChatDesktop folder in terminal
+then run 
+npm install
+npm run build-mac
+
+a mac installer should be created in a new /dist folder.

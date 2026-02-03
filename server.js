@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const socketIo = require('socket.io');
 const path = require('path');
 const fs = require('fs');
@@ -10,7 +11,26 @@ const Database = require('./database');
 const config = require('./config');
 
 const app = express();
-const server = http.createServer(app);
+
+// Create HTTP or HTTPS server based on config
+let server;
+if (config.server.enableHttps) {
+  try {
+    const options = {
+      key: fs.readFileSync(config.server.sslKeyPath),
+      cert: fs.readFileSync(config.server.sslCertPath)
+    };
+    server = https.createServer(options, app);
+    console.log('🔒 HTTPS enabled');
+  } catch (error) {
+    console.error('Failed to load SSL certificates, falling back to HTTP');
+    console.error('Run ./setup-https.sh to generate certificates');
+    server = http.createServer(app);
+  }
+} else {
+  server = http.createServer(app);
+}
+
 const io = socketIo(server);
 const db = new Database();
 const filter = new Filter();
@@ -39,6 +59,7 @@ dirs.forEach(dir => {
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(config.uploads.uploadPath));
+app.use('/downloads', express.static('./public/downloads'));
 app.use('/tiles', express.static(config.maps.tilePath));
 
 // Rate limiting
@@ -333,6 +354,8 @@ app.post('/api/admin/clear-data', async (req, res) => {
 });
 
 // Socket.IO connection handling
+const voiceRooms = new Map(); // roomId -> Set of user IDs (MUST BE GLOBAL!)
+
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
@@ -523,8 +546,156 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('join_voice', (data) => {
+    const { roomId } = data;
+    const user = connectedUsers.get(socket.id);
+    
+    if (!user) {
+      console.log('❌ User not found in connectedUsers:', socket.id);
+      return;
+    }
+
+    console.log(`\n🎤 ${user.nickname} (${socket.id}) joining voice room ${roomId}`);
+    console.log(`   roomId type: ${typeof roomId}, value: ${JSON.stringify(roomId)}`);
+    console.log(`   voiceRooms.has(${roomId}):`, voiceRooms.has(roomId));
+    console.log(`   Current voiceRooms keys:`, Array.from(voiceRooms.keys()));
+
+    // Add user to voice room
+    if (!voiceRooms.has(roomId)) {
+      console.log(`   Creating new voice room for roomId: ${roomId}`);
+      voiceRooms.set(roomId, new Set());
+    } else {
+      console.log(`   Using existing voice room, current size:`, voiceRooms.get(roomId).size);
+    }
+    voiceRooms.get(roomId).add(socket.id);
+    
+    console.log(`📋 Voice room ${roomId} now has:`, Array.from(voiceRooms.get(roomId)));
+
+    // Join socket room for voice signaling
+    socket.join(`voice_${roomId}`);
+
+    // Notify others in voice (not yourself!)
+    socket.to(`voice_${roomId}`).emit('voice_user_joined', {
+      userId: socket.id,
+      nickname: user.nickname
+    });
+
+    // Build complete participants list for EVERYONE
+    console.log(`🔨 Building participants list...`);
+    const allParticipants = Array.from(voiceRooms.get(roomId))
+      .map(userId => {
+        const u = connectedUsers.get(userId);
+        console.log(`  - Mapping userId ${userId} → ${u ? u.nickname : 'NOT FOUND'}`);
+        return u ? { userId, nickname: u.nickname, talking: false } : null;
+      })
+      .filter(Boolean);
+    
+    console.log(`✅ All participants:`, allParticipants.map(p => p.nickname));
+
+    // Send each user a custom list excluding themselves
+    console.log(`📤 Sending participant lists...`);
+    for (const userId of voiceRooms.get(roomId)) {
+      const userSocket = io.sockets.sockets.get(userId);
+      if (userSocket) {
+        const participantsForUser = allParticipants.filter(p => p.userId !== userId);
+        console.log(`  → Sending to ${connectedUsers.get(userId)?.nickname || 'unknown'} (${userId}):`, participantsForUser.map(p => p.nickname));
+        userSocket.emit('voice_participants', participantsForUser);
+      } else {
+        console.log(`  ❌ Socket not found for userId: ${userId}`);
+      }
+    }
+    
+    console.log(`\n📊 Summary: ${user.nickname} joined voice in room ${roomId}`);
+    console.log(`   Total ${allParticipants.length} users in voice\n`);
+  });
+
+  socket.on('leave_voice', (data) => {
+    const { roomId } = data;
+    const user = connectedUsers.get(socket.id);
+    
+    if (!user) return;
+
+    // Remove from voice room
+    if (voiceRooms.has(roomId)) {
+      voiceRooms.get(roomId).delete(socket.id);
+      
+      // Broadcast updated participants to remaining users
+      const participants = Array.from(voiceRooms.get(roomId)).map(userId => {
+        const u = connectedUsers.get(userId);
+        return u ? { userId, nickname: u.nickname, talking: false } : null;
+      }).filter(Boolean);
+      
+      io.to(`voice_${roomId}`).emit('voice_participants', participants);
+      
+      if (voiceRooms.get(roomId).size === 0) {
+        voiceRooms.delete(roomId);
+      }
+    }
+
+    // Leave socket room
+    socket.leave(`voice_${roomId}`);
+
+    // Notify others
+    socket.to(`voice_${roomId}`).emit('voice_user_left', {
+      userId: socket.id,
+      nickname: user.nickname
+    });
+
+    console.log(`${user.nickname} left voice in room ${roomId}`);
+  });
+
+  socket.on('voice_talking', (data) => {
+    const { roomId, talking } = data;
+    const user = connectedUsers.get(socket.id);
+    
+    if (!user) return;
+    
+    // Broadcast talking status to EVERYONE in voice (including sender)
+    io.to(`voice_${roomId}`).emit('voice_talking_update', {
+      userId: socket.id,
+      nickname: user.nickname,
+      talking
+    });
+  });
+
+  // WebRTC signaling
+  socket.on('voice_offer', (data) => {
+    const { to, offer } = data;
+    io.to(to).emit('voice_offer', {
+      from: socket.id,
+      offer
+    });
+  });
+
+  socket.on('voice_answer', (data) => {
+    const { to, answer } = data;
+    io.to(to).emit('voice_answer', {
+      from: socket.id,
+      answer
+    });
+  });
+
+  socket.on('voice_ice_candidate', (data) => {
+    const { to, candidate } = data;
+    io.to(to).emit('voice_ice_candidate', {
+      from: socket.id,
+      candidate
+    });
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
+    
+    // Remove from all voice rooms
+    voiceRooms.forEach((users, roomId) => {
+      if (users.has(socket.id)) {
+        users.delete(socket.id);
+        socket.to(`voice_${roomId}`).emit('voice_user_left', {
+          userId: socket.id
+        });
+      }
+    });
+    
     connectedUsers.delete(socket.id);
     io.emit('user_list', Array.from(connectedUsers.values()));
   });
@@ -541,8 +712,14 @@ async function start() {
     }, config.retention.cleanupIntervalHours * 60 * 60 * 1000);
 
     server.listen(config.server.port, config.server.host, () => {
+      const protocol = config.server.enableHttps ? 'https' : 'http';
       console.log(`EmComm Chat Server running on ${config.server.host}:${config.server.port}`);
-      console.log(`Access the interface at http://localhost:${config.server.port}`);
+      console.log(`Access the interface at ${protocol}://localhost:${config.server.port}`);
+      if (config.server.enableHttps) {
+        console.log(`⚠️  Using self-signed certificate - browsers will show a warning`);
+      } else {
+        console.log(`ℹ️  Running HTTP - voice features require HTTPS on mobile devices`);
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error);

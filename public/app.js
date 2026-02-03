@@ -10,6 +10,154 @@ let blockedUsers = new Set();
 let adminCredentials = null;
 let map = null;
 let selectedLocation = null;
+let unreadDMs = new Map(); // Track unread DMs by user ID
+
+// Notification sound system
+let notificationEnabled = localStorage.getItem('notificationSound') !== 'false';
+let notificationVolume = parseFloat(localStorage.getItem('notificationVolume') || '0.5');
+
+function createNotificationSound() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    gainNode.gain.value = notificationVolume * 0.3;
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+    
+    const oscillator2 = audioContext.createOscillator();
+    const gainNode2 = audioContext.createGain();
+    
+    oscillator2.connect(gainNode2);
+    gainNode2.connect(audioContext.destination);
+    
+    oscillator2.frequency.value = 1000;
+    gainNode2.gain.value = notificationVolume * 0.3;
+    
+    oscillator2.start(audioContext.currentTime + 0.1);
+    oscillator2.stop(audioContext.currentTime + 0.2);
+}
+
+function playNotificationSound() {
+    if (notificationEnabled) {
+        try {
+            createNotificationSound();
+        } catch (error) {
+            console.error('Error playing notification:', error);
+        }
+    }
+}
+
+function addNotificationControls() {
+    const userInfo = document.querySelector('.user-info');
+    if (!userInfo) return;
+    
+    const notifBtn = document.createElement('button');
+    notifBtn.id = 'notification-btn';
+    notifBtn.className = 'icon-btn';
+    notifBtn.title = notificationEnabled ? 'Notifications: On' : 'Notifications: Off';
+    notifBtn.textContent = notificationEnabled ? '🔔' : '🔕';
+    notifBtn.onclick = handleNotificationClick; // Use new handler
+    
+    const downloadBtn = userInfo.querySelector('a[href="/downloads.html"]');
+    if (downloadBtn) {
+        userInfo.insertBefore(notifBtn, downloadBtn);
+    } else {
+        const adminBtn = document.getElementById('admin-btn');
+        if (adminBtn) {
+            userInfo.insertBefore(notifBtn, adminBtn);
+        }
+    }
+}
+
+function handleNotificationClick() {
+    const notifBtn = document.getElementById('notification-btn');
+    
+    // If bell is glowing (has unread DMs), open the latest DM
+    if (notifBtn && notifBtn.classList.contains('has-unread-dm')) {
+        openLatestUnreadDM();
+    } else {
+        // Otherwise, toggle notification sounds
+        toggleNotifications();
+    }
+}
+
+function openLatestUnreadDM() {
+    // Find the first user with unread DMs
+    let latestUserId = null;
+    let latestUser = null;
+    
+    for (const [userId, count] of unreadDMs.entries()) {
+        if (count > 0) {
+            latestUserId = userId;
+            break;
+        }
+    }
+    
+    if (latestUserId) {
+        // Find the user object
+        latestUser = users.find(u => u.id === latestUserId);
+        if (latestUser) {
+            // Switch to Users tab
+            switchTab('users');
+            // Open the DM
+            openDM(latestUser);
+            
+            // On mobile, close sidebar after opening DM
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('.sidebar');
+                const sidebarOverlay = document.getElementById('sidebar-overlay');
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                if (sidebar) sidebar.classList.remove('open');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.textContent = '☰';
+                    mobileMenuBtn.classList.remove('back');
+                }
+            }
+        }
+    }
+}
+
+function toggleNotifications() {
+    notificationEnabled = !notificationEnabled;
+    localStorage.setItem('notificationSound', notificationEnabled);
+    
+    const btn = document.getElementById('notification-btn');
+    if (btn) {
+        btn.textContent = notificationEnabled ? '🔔' : '🔕';
+        btn.title = notificationEnabled ? 'Notifications: On' : 'Notifications: Off';
+    }
+    
+    if (notificationEnabled) {
+        playNotificationSound();
+    }
+    
+    // Update indicator in case DMs are waiting
+    updateNotificationIndicator();
+}
+
+// Update notification button to show unread DM indicator (desktop)
+function updateNotificationIndicator() {
+    const notifBtn = document.getElementById('notification-btn');
+    if (!notifBtn) return;
+    
+    // Count total unread DMs
+    let totalUnread = 0;
+    unreadDMs.forEach(count => totalUnread += count);
+    
+    // Add/remove indicator class
+    if (totalUnread > 0) {
+        notifBtn.classList.add('has-unread-dm');
+    } else {
+        notifBtn.classList.remove('has-unread-dm');
+    }
+}
 
 // DOM Elements
 const loginScreen = document.getElementById('login-screen');
@@ -36,10 +184,77 @@ const mapModal = document.getElementById('map-modal');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure login screen is visible on load
+    if (loginScreen && chatScreen) {
+        loginScreen.classList.add('active');
+        chatScreen.classList.remove('active');
+    }
     setupEventListeners();
+    
+    // Handle Android back button
+    setupBackButtonHandler();
 });
 
+function setupBackButtonHandler() {
+    // Intercept Android back button
+    window.addEventListener('popstate', (e) => {
+        const sidebar = document.querySelector('.sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        
+        // If sidebar is open, close it instead of going back
+        if (sidebar && sidebar.classList.contains('open')) {
+            e.preventDefault();
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.textContent = '☰';
+                mobileMenuBtn.classList.remove('back');
+            }
+            // Push state to prevent actual navigation
+            window.history.pushState(null, '', window.location.href);
+        }
+    });
+    
+    // Push initial state to enable popstate handling
+    window.history.pushState(null, '', window.location.href);
+}
+
 function setupEventListeners() {
+    // Mobile menu toggle with back button
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('open');
+            
+            if (isOpen) {
+                // Close sidebar (back button clicked)
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                mobileMenuBtn.textContent = '☰';
+                mobileMenuBtn.classList.remove('back');
+            } else {
+                // Open sidebar
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('active');
+                mobileMenuBtn.textContent = '←';
+                mobileMenuBtn.classList.add('back');
+                // Push history state so Android back button can close it
+                window.history.pushState({ sidebarOpen: true }, '', window.location.href);
+            }
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            mobileMenuBtn.textContent = '☰';
+            mobileMenuBtn.classList.remove('back');
+        });
+    }
+
     // Login
     joinBtn.addEventListener('click', handleLogin);
     nicknameInput.addEventListener('keypress', (e) => {
@@ -112,8 +327,8 @@ function switchTab(view) {
 async function handleLogin() {
     const nickname = nicknameInput.value.trim();
     
-    if (nickname.length < 8 || nickname.length > 16) {
-        alert('Nickname must be between 8 and 16 characters');
+    if (nickname.length < 4 || nickname.length > 16) {
+        alert('Nickname must be between 4 and 16 characters');
         return;
     }
 
@@ -123,7 +338,8 @@ async function handleLogin() {
     }
 
     // Connect to socket server
-    socket = io();
+    // Use current origin for Android app compatibility
+    socket = io(window.location.origin);
 
     socket.on('connect', () => {
         console.log('Connected to server');
@@ -137,6 +353,20 @@ async function handleLogin() {
         chatScreen.classList.add('active');
         loadRooms();
         setupSocketListeners();
+        
+        // Add notification controls
+        addNotificationControls();
+        
+        // Auto-join General room
+        setTimeout(() => {
+            const generalRoom = rooms.find(r => r.name.toLowerCase() === 'general');
+            if (generalRoom) {
+                joinRoom(generalRoom);
+            }
+        }, 500); // Small delay to ensure rooms are loaded
+        
+        // Initialize voice channel
+        window.voiceChannel = new VoiceChannel(socket, currentUser);
     });
 
     socket.on('error', (data) => {
@@ -176,13 +406,31 @@ function setupSocketListeners() {
     });
 
     socket.on('new_dm', (message) => {
+        // Always play notification for incoming DMs (regardless of current view)
+        const isIncoming = message.sender_id !== currentUser.userId;
+        if (isIncoming) {
+            playNotificationSound(); // Play sound HERE
+            
+            // Track unread DM
+            const senderId = message.sender_id;
+            if (!currentDM || currentDM.id !== senderId) {
+                // Not currently viewing this DM, mark as unread
+                const currentCount = unreadDMs.get(senderId) || 0;
+                unreadDMs.set(senderId, currentCount + 1);
+            }
+        }
+        
+        // Only show message if viewing this DM conversation
         if (currentDM) {
             const otherUserId = message.sender_id === currentUser.userId ? message.recipient_id : message.sender_id;
             if (otherUserId === currentDM.id) {
-                appendMessage(message, true);
+                appendMessage(message, true, false); // playSound=false (already played above)
             }
         }
+        renderUsers(); // Re-render to show unread badges
         updateDMsList();
+        updateMenuButtonIndicator(); // Update menu button (mobile)
+        updateNotificationIndicator(); // Update bell icon (desktop)
     });
 
     socket.on('message_deleted', (data) => {
@@ -228,8 +476,12 @@ function renderUsers() {
         if (currentDM && currentDM.id === user.id) {
             item.classList.add('active');
         }
+        
+        const unreadCount = unreadDMs.get(user.id) || 0;
+        const unreadBadge = unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : '';
+        
         item.innerHTML = `
-            <h4>${user.nickname}</h4>
+            <h4>${user.nickname} ${unreadBadge}</h4>
             <p>Online</p>
         `;
         item.addEventListener('click', () => openDM(user));
@@ -247,6 +499,11 @@ async function joinRoom(room) {
     messageInput.disabled = false;
     sendBtn.disabled = false;
     
+    // Update voice channel room
+    if (window.voiceChannel) {
+        window.voiceChannel.setCurrentRoom(room.id, room.name);
+    }
+    
     renderRooms();
     await loadRoomMessages(room.id);
 }
@@ -257,7 +514,7 @@ async function loadRoomMessages(roomId) {
         const messages = await response.json();
         
         messagesContainer.innerHTML = '';
-        messages.forEach(msg => appendMessage(msg));
+        messages.forEach(msg => appendMessage(msg, false, false)); // Don't play sound for history
         scrollToBottom();
     } catch (error) {
         console.error('Failed to load messages:', error);
@@ -272,7 +529,12 @@ async function openDM(user) {
     messageInput.disabled = false;
     sendBtn.disabled = false;
     
+    // Clear unread count for this user
+    unreadDMs.delete(user.id);
+    
     renderUsers();
+    updateMenuButtonIndicator(); // Update menu button (mobile)
+    updateNotificationIndicator(); // Update bell icon (desktop)
     await loadDMMessages(user.id);
 }
 
@@ -282,14 +544,14 @@ async function loadDMMessages(userId) {
         const messages = await response.json();
         
         messagesContainer.innerHTML = '';
-        messages.forEach(msg => appendMessage(msg, true));
+        messages.forEach(msg => appendMessage(msg, true, false)); // Don't play sound for history
         scrollToBottom();
     } catch (error) {
         console.error('Failed to load DMs:', error);
     }
 }
 
-function appendMessage(message, isDM = false) {
+function appendMessage(message, isDM = false, playSound = true) {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'message';
     msgDiv.dataset.messageId = message.id;
@@ -297,6 +559,11 @@ function appendMessage(message, isDM = false) {
     const isOwn = message.sender_id === currentUser.userId;
     if (isOwn) {
         msgDiv.classList.add('own');
+    }
+    
+    // Play notification sound for incoming messages (only for real-time, not history)
+    if (!isOwn && playSound) {
+        playNotificationSound();
     }
 
     const time = new Date(message.created_at).toLocaleTimeString();
@@ -466,6 +733,49 @@ function openLocationPicker() {
         return;
     }
 
+    // Try to get location immediately
+    if (navigator.geolocation) {
+        const confirmed = confirm('Share your current location?');
+        if (confirmed) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Success - send immediately
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    if (currentRoom) {
+                        socket.emit('send_message', {
+                            roomId: currentRoom.id,
+                            message: 'Shared location',
+                            messageType: 'location',
+                            location: location
+                        });
+                    } else if (currentDM) {
+                        socket.emit('send_dm', {
+                            recipientId: currentDM.id,
+                            message: 'Shared location',
+                            messageType: 'location',
+                            location: location
+                        });
+                    }
+                },
+                (error) => {
+                    // Failed - open map picker
+                    console.log('Geolocation error, falling back to map:', error);
+                    openMapPicker();
+                }
+            );
+            return;
+        }
+    }
+    
+    // No geolocation or user declined - open map picker
+    openMapPicker();
+}
+
+function openMapPicker() {
     mapModal.classList.add('active');
     document.getElementById('send-location-btn').style.display = 'block';
 
@@ -489,7 +799,7 @@ function openLocationPicker() {
         });
     }
 
-    // Try to get user's current location
+    // Try to center map on user's location
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             const lat = position.coords.latitude;
@@ -773,4 +1083,21 @@ function viewLocationOnMap(lat, lng) {
     
     window.viewLocationMarker = L.marker([lat, lng]).addTo(map);
     document.getElementById('send-location-btn').style.display = 'none';
+}
+
+// Update menu button to show unread DM indicator
+function updateMenuButtonIndicator() {
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    if (!mobileMenuBtn) return;
+    
+    // Count total unread DMs
+    let totalUnread = 0;
+    unreadDMs.forEach(count => totalUnread += count);
+    
+    // Add/remove indicator class
+    if (totalUnread > 0) {
+        mobileMenuBtn.classList.add('has-unread');
+    } else {
+        mobileMenuBtn.classList.remove('has-unread');
+    }
 }

@@ -1,0 +1,36 @@
+{
+  "name": "emcomm-chat",
+  "version": "2.0.0",
+  "description": "EmComm Chat Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-win": "electron-builder --win",
+    "build-linux": "electron-builder --linux",
+    "build-mac": "electron-builder --mac",
+    "build-all": "electron-builder -wml"
+  },
+  "build": {
+    "appId": "com.emcomm.chat",
+    "productName": "EmComm Chat",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Network"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
