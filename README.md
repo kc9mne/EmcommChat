@@ -1,18 +1,29 @@
 # EmComm Chat - Emergency Communications Platform
 
-Offline-first emergency communications platform for text chat, direct messaging, file sharing, and location tracking.
+Offline-first emergency communications platform for text chat, voice/PTT, file sharing, and location tracking.
 
 ## Features
 
-- 📱 **Real-time Chat**: Multiple chat rooms and direct messaging
+- 💬 **Real-time Chat**: Multiple chat rooms with persistent message history
+- 🎤 **Voice/PTT**: WebRTC-based Push-to-Talk voice channels (Ham radio compliant - no encryption)
 - 📍 **Location Sharing**: Share GPS coordinates with offline maps
 - 🖼️ **Image Sharing**: Upload and share images inline in chat
 - 📁 **File Sharing**: Upload and download files with web-based file browser
 - 👥 **User Management**: Nickname-based identification with blocking capabilities
-- 🔒 **Admin Controls**: Create/delete rooms, kick users, delete messages
+- 🔐 **Admin Controls**: Create/delete rooms, kick users, delete messages
 - 🗑️ **Auto-Cleanup**: Configurable message retention (1-7 days)
 - 🚫 **Content Filtering**: Built-in profanity filter
-- 🌐 **Offline Maps**: Support for locally-hosted map tiles
+- 🗺️ **Offline Maps**: Support for locally-hosted map tiles
+- 🖥️ **Desktop Apps**: Native Windows and Linux applications with built-in voice support
+
+## Voice/PTT Features
+
+✅ **Push-to-Talk** - Hold to transmit, release to listen  
+✅ **Active Speaker Indicators** - See who's talking with visual feedback  
+✅ **Channel Collision Detection** - PTT disabled when channel is busy  
+✅ **Participant Lists** - Real-time list of users in voice channel   
+✅ **Ham Radio Compliant** - No encryption, plain WebRTC audio  
+✅ **Desktop & Browser Support** - Works on both platforms  
 
 ## Requirements
 
@@ -30,8 +41,8 @@ Offline-first emergency communications platform for text chat, direct messaging,
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Navigate to project directory
-cd emcomm-chat
+# Clone/download the project
+cd EmcommChat
 
 # Install dependencies
 npm install
@@ -81,9 +92,53 @@ The server will start on `http://localhost:3000` (or your configured port).
 
 Open a web browser and navigate to:
 - Local: `http://localhost:3000`
-- Network: `http://YOUR_SBC_IP:3000`
+- Network: `http://YOUR_SERVER_IP:3000`
 
 Users can connect from any device on your network.
+
+## Voice/PTT Setup
+
+### Desktop Apps (Recommended)
+
+Desktop applications have built-in microphone access and don't require additional setup.
+
+**Download and install:**
+1. Navigate to `http://YOUR_SERVER_IP:3000/downloads.html`
+2. Download for your platform:
+   - Windows: `.exe` installer
+   - Linux: `.AppImage` (make executable with `chmod +x`)
+3. Run the application - it auto-connects to your server
+
+**Building desktop apps yourself:**
+```bash
+cd desktop-app
+
+# Install dependencies
+npm install
+
+# Build for your platform
+npx electron-builder --win       # Windows
+npx electron-builder --linux     # Linux AppImage
+npx electron-builder --mac       # macOS
+
+# Outputs will be in dist/ folder
+```
+
+### Browser Access
+
+For voice/PTT in Chrome or Edge browsers:
+
+1. Open Chrome or Edge
+2. Navigate to: `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
+3. Add your server URL: `http://YOUR_SERVER_IP:3000`
+4. Set to "Enabled"
+5. Click "Relaunch" to restart browser
+6. Navigate to your EmComm Chat server
+7. Voice/PTT should now work!
+
+**Note:** This setting only affects the specific URL you enter. Your browser remains secure for all other websites.
+
+See `/public/downloads.html` for detailed step-by-step instructions with screenshots.
 
 ## Offline Map Setup
 
@@ -149,7 +204,7 @@ After=network.target
 [Service]
 Type=simple
 User=YOUR_USERNAME
-WorkingDirectory=/home/YOUR_USERNAME/emcomm-chat
+WorkingDirectory=/home/YOUR_USERNAME/EmcommChat
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=10
@@ -227,13 +282,27 @@ sudo ufw enable
 
 ### For Users
 
+#### Text Chat
 1. **Join Network**: Enter a nickname (8-16 characters)
 2. **Select Room**: Click on a room in the Rooms tab
 3. **Send Messages**: Type and press Enter or click Send
 4. **Share Images**: Click the image icon (🖼️)
 5. **Share Location**: Click the location icon (📍)
-6. **Direct Messages**: Go to Users tab, click a user
-7. **Upload Files**: Go to Files tab, click Upload File
+6. **Upload Files**: Go to Files tab, click Upload File
+
+#### Voice/PTT
+1. **Join Voice Channel**: Click "🎤 Push to Talk" in the sidebar
+2. **Transmit**: Press and hold the PTT button while speaking
+3. **Release**: Let go of the button to listen
+4. **View Participants**: See who's in the voice channel below the PTT button
+5. **Active Speakers**: Users currently talking show in green with 🔊 icon
+6. **Leave Voice**: Click "Leave Voice" button when done
+
+**PTT Tips:**
+- 🟢 Green button = Ready to transmit
+- 🔴 Red button = You're transmitting
+- 🔴 Red disabled = Channel busy (someone else talking)
+- Wait for green before transmitting!
 
 ### For Administrators
 
@@ -246,20 +315,25 @@ sudo ufw enable
 ## File Structure
 
 ```
-emcomm-chat/
-├── server.js           # Main server application
-├── database.js         # SQLite database layer
-├── config.js           # Configuration file
-├── package.json        # Node.js dependencies
-├── public/             # Frontend files
-│   ├── index.html      # Main HTML interface
-│   ├── style.css       # Stylesheet
-│   └── app.js          # Client-side JavaScript
-├── data/               # SQLite database (created automatically)
-├── uploads/            # File uploads (created automatically)
-│   └── images/         # Image uploads
-├── map-tiles/          # Offline map tiles (you provide)
-└── README.md           # This file
+EmcommChat/
+├── server.js              # Main server application
+├── database.js            # SQLite database layer
+├── config.js              # Configuration file
+├── package.json           # Node.js dependencies
+├── public/                # Frontend files
+│   ├── index.html         # Main HTML interface
+│   ├── style.css          # Stylesheet
+│   ├── app.js             # Client-side JavaScript
+│   ├── voice.js           # Voice/PTT WebRTC handler
+│   └── downloads.html     # Download page with setup instructions
+├── desktop-app/           # Desktop application source
+│   ├── main.js            # Electron main process
+│   └── package.json       # Desktop app dependencies
+├── data/                  # SQLite database (created automatically)
+├── uploads/               # File uploads (created automatically)
+│   └── images/            # Image uploads
+├── map-tiles/             # Offline map tiles (you provide)
+└── README.md              # This file
 ```
 
 ## Maintenance
@@ -272,9 +346,6 @@ pm2 logs emcomm-chat
 
 # If using systemd
 sudo journalctl -u emcomm-chat -f
-
-# Application logs
-tail -f /home/claude/emcomm-chat/logs/*.log
 ```
 
 ### Database Backup
@@ -319,6 +390,40 @@ du -sh data/
 3. Verify port is not in use: `sudo netstat -tulpn | grep 3000`
 4. Check logs for errors
 
+### Voice/PTT Not Working
+
+**In Browser:**
+1. Verify Chrome flags are set correctly (see Voice/PTT Setup above)
+2. Check microphone permissions in browser
+3. Open browser console (F12) and look for errors
+4. Verify server is accessible over HTTP (not HTTPS)
+
+**In Desktop App:**
+1. Check system microphone permissions
+2. Verify app can connect to server
+3. Try closing and reopening the app
+4. Check Task Manager - ensure only one instance is running
+
+**Common Issues:**
+- **"Unknown" on PTT button**: Participant list not loading - refresh page
+- **Red disabled button**: Someone else is talking - wait for them to finish
+- **Can hear myself**: Should not happen - report as bug if it does
+- **No participant list**: Check browser console for errors
+
+### Desktop App Won't Close
+
+**Windows:**
+1. Open Task Manager (Ctrl+Shift+Esc)
+2. Find "EmComm Chat" process
+3. Right-click → End Task
+
+**Linux:**
+```bash
+pkill -f emcomm-chat
+```
+
+This issue is fixed in v2.0.0+ of the desktop apps.
+
 ### Map Tiles Not Loading
 
 1. Verify tiles exist in `./map-tiles/` directory
@@ -349,6 +454,12 @@ du -sh data/
 - HTTPS/TLS (add nginx reverse proxy if needed)
 - Protection against malicious users on the network
 
+**Voice/PTT Security:**
+- Audio is transmitted in plain WebRTC (no encryption)
+- Compliant with Ham radio regulations (no encryption allowed)
+- Anyone on the network can join voice channels
+- No user verification before transmitting
+
 For deployment scenarios where security is critical:
 
 1. **Change admin password immediately**
@@ -356,6 +467,7 @@ For deployment scenarios where security is critical:
 3. **Consider adding nginx reverse proxy** with basic auth
 4. **Regularly backup the database**
 5. **Monitor for abuse** using admin controls
+6. **Restrict physical network access** - trusted users only
 
 ## Performance Tuning
 
@@ -376,7 +488,38 @@ uploads: {
 Consider using:
 - SQLite write-ahead logging (WAL mode)
 - Nginx as reverse proxy for static file serving
-- Redis for session management (advanced)
+- PM2 for process management and auto-restart
+
+## Recent Updates (v2.0 - February 2025)
+
+### 🎤 Voice/PTT System - PRODUCTION READY!
+- ✅ Fixed critical voiceRooms scope bug (was recreated per connection)
+- ✅ Participant lists now working correctly
+- ✅ PTT shows real usernames instead of "Unknown"
+- ✅ Active speaker indicators with green pulsing animation
+- ✅ Channel collision detection prevents talking over others
+- ✅ No audio loopback (you won't hear yourself)
+- ✅ Desktop apps with proper exit handling (no lingering processes)
+- ✅ Professional downloads page with Chrome setup instructions
+
+### 🧹 UI Cleanup
+- ✅ Removed unused "Messages" tab from sidebar
+- ✅ Cleaner interface focused on essential features
+- ✅ Responsive voice panel for desktop and mobile
+
+### 🖥️ Desktop Applications
+- ✅ Windows and Linux builds available
+- ✅ Built-in HTTP microphone access (no Chrome flags needed)
+- ✅ Proper process cleanup on exit
+- ✅ Single instance lock prevents multiple processes
+- ✅ Auto-connects to configured server
+
+## Known Limitations
+
+- **Mobile WebView**: Voice/PTT does not work in mobile app WebView (Android/iOS)
+- **macOS Desktop App**: Must be built on a Mac (cross-compilation not supported)
+- **Firefox/Safari**: Limited voice support - Chrome/Edge recommended
+- **HTTPS Required for Mobile**: Mobile browsers require HTTPS for microphone access (desktop apps bypass this)
 
 ## Contributing
 
@@ -387,6 +530,7 @@ This is a purpose-built emergency communications tool. Contributions welcome for
 - Additional offline features
 - Better map tile management
 - Enhanced admin controls
+- Voice system improvements
 
 ## License
 
@@ -397,7 +541,8 @@ MIT License - Use freely for emergency communications
 For issues or questions:
 1. Check the troubleshooting section
 2. Review server logs
-3. Check GitHub issues (if hosted on GitHub)
+3. Check `/public/downloads.html` for voice setup
+4. Open an issue on GitHub
 
 ## Credits
 
@@ -405,6 +550,11 @@ Built for emergency communications scenarios where traditional infrastructure ma
 
 Uses:
 - Socket.io for real-time communication
+- WebRTC for voice/PTT channels
 - Leaflet.js for mapping
 - SQLite for data storage
 - Express.js for web server
+- Electron for desktop applications
+
+---
+
